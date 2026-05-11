@@ -298,8 +298,9 @@ function closeDeleteModal() {
 document.getElementById('cancel-delete').addEventListener('click', closeDeleteModal);
 document.getElementById('confirm-delete').addEventListener('click', async () => {
   if (deletingId !== null) {
+    const id = deletingId;
     closeDeleteModal();
-    await deleteTask(deletingId);
+    await deleteTask(id);
   }
 });
 
