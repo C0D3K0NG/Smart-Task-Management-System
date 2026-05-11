@@ -4,7 +4,7 @@ Flask application with REST APIs, PostgreSQL, WebSockets, and Analytics
 """
 
 from flask import Flask, request, jsonify, session, render_template, redirect, url_for, Response
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import psycopg2
@@ -392,7 +392,7 @@ def add_task():
         cur.close(); conn.close()
         _serialize_task_dates(task)
 
-        socketio.emit("task_added", task)
+        socketio.emit("task_added", task, to=f"user_{user_id}")
         return jsonify({"message": "Task created", "task": task}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -448,7 +448,7 @@ def update_task(task_id):
 
         _serialize_task_dates(task)
 
-        socketio.emit("task_updated", task)
+        socketio.emit("task_updated", task, to=f"user_{user_id}")
         return jsonify({"message": "Task updated", "task": task}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -473,7 +473,7 @@ def delete_task(task_id):
         conn.commit()
         cur.close(); conn.close()
 
-        socketio.emit("task_deleted", {"id": task_id})
+        socketio.emit("task_deleted", {"id": task_id}, to=f"user_{user_id}")
         return jsonify({"message": "Task deleted"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -505,7 +505,7 @@ def duplicate_task(task_id):
         cur.close(); conn.close()
         _serialize_task_dates(task)
 
-        socketio.emit("task_added", task)
+        socketio.emit("task_added", task, to=f"user_{user_id}")
         return jsonify({"message": "Task duplicated", "task": task}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -560,7 +560,11 @@ def analytics():
 # ─── WebSocket Events ─────────────────────────────────────────────────────────
 @socketio.on("connect")
 def on_connect():
-    emit("connected", {"message": "Connected to Task Manager WebSocket"})
+    if "user_id" in session:
+        join_room(f"user_{session['user_id']}")
+        emit("connected", {"message": "Connected to Task Manager WebSocket"})
+    else:
+        return False
 
 
 @socketio.on("ping")
