@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     (function(){
@@ -20,16 +21,15 @@
   <!-- ── Sidebar ─────────────────────────────────────────── -->
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-mark">✦</span>
       <span class="brand-name">TaskFlow</span>
     </div>
 
     <nav class="sidebar-nav">
       <button class="nav-item active" data-view="tasks">
-        <span class="nav-icon">◈</span> Tasks
+        <span class="nav-icon"><i data-lucide="check-square"></i></span> Tasks
       </button>
       <button class="nav-item" data-view="analytics">
-        <span class="nav-icon">◎</span> Analytics
+        <span class="nav-icon"><i data-lucide="bar-chart-2"></i></span> Analytics
       </button>
     </nav>
 
@@ -38,13 +38,13 @@
         <span class="user-avatar">{{ username[0]|upper }}</span>
         <span class="user-name">{{ username }}</span>
       </div>
-      <button id="logout-btn" class="logout-btn" title="Logout">⎋</button>
+      <button id="logout-btn" class="logout-btn" title="Logout"><i data-lucide="log-out"></i></button>
     </div>
   </aside>
 
   <!-- ── Theme Toggle (top-right) ───────────────────────── -->
   <button id="theme-toggle-sidebar" class="theme-toggle-corner" title="Toggle dark/light mode" aria-label="Toggle theme">
-    <span id="theme-icon">🌙</span>
+    <span id="theme-icon"><i data-lucide="moon"></i></span>
   </button>
 
   <!-- ── Main ───────────────────────────────────────────── -->
@@ -70,7 +70,7 @@
           <p class="view-sub">Manage and track your work</p>
         </div>
         <div class="header-actions">
-          <button id="export-btn" class="btn-outline" title="Export tasks as CSV">⤓ Export</button>
+          <button id="export-btn" class="btn-outline" title="Export tasks as CSV"><i data-lucide="download" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"></i> Export</button>
           <button id="open-modal-btn" class="btn-add">+ Add Task</button>
         </div>
       </header>
@@ -89,7 +89,7 @@
       <!-- Search + Sort -->
       <div class="search-sort-row">
         <div class="search-bar">
-          <span class="search-icon">⌕</span>
+          <span class="search-icon"><i data-lucide="search" style="width:16px;height:16px;"></i></span>
           <input id="search-input" type="text" placeholder="Search tasks…" autocomplete="off" />
         </div>
         <select id="sort-select" class="sort-select" title="Sort tasks">
@@ -123,7 +123,7 @@
           <h2 class="view-title">Analytics</h2>
           <p class="view-sub">Powered by Pandas &amp; NumPy</p>
         </div>
-        <button id="refresh-analytics" class="btn-outline">↻ Refresh</button>
+        <button id="refresh-analytics" class="btn-outline"><i data-lucide="refresh-cw" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"></i> Refresh</button>
       </header>
 
       <div id="analytics-content">
@@ -137,7 +137,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="modal-title">New Task</h3>
-        <button id="close-modal" class="modal-close">✕</button>
+        <button id="close-modal" class="modal-close"><i data-lucide="x"></i></button>
       </div>
 
       <div class="form-group">
@@ -183,7 +183,7 @@
   <!-- ── Delete Confirmation Modal ──────────────────────── -->
   <div id="delete-modal" class="modal-overlay hidden">
     <div class="confirm-modal-card">
-      <div class="confirm-icon">🗑</div>
+      <div class="confirm-icon"><i data-lucide="trash-2"></i></div>
       <h3>Delete Task?</h3>
       <p>This action cannot be undone. The task will be permanently removed.</p>
       <div class="confirm-actions">
@@ -203,5 +203,8 @@
     document.getElementById('greeting-text').textContent = `${greetWord}, {{ username }}!`;
   </script>
   <script src="/static/js/dashboard.js"></script>
+  <script>
+    if (window.lucide) lucide.createIcons();
+  </script>
 </body>
 </html>

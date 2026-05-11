@@ -38,7 +38,8 @@ const themeIcon   = document.getElementById('theme-icon');
 
 function updateThemeUI() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if (themeIcon) themeIcon.textContent = isDark ? '☀️' : '🌙';
+  if (themeIcon) themeIcon.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+  if (window.lucide) lucide.createIcons();
 }
 updateThemeUI();
 
@@ -72,7 +73,7 @@ socket.on('task_added', task => {
   if (!tasks.find(t => t.id === task.id)) {
     tasks.unshift(task);
     renderTasks();
-    showToast('✦ New task added');
+    showToast('<i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> New task added');
   }
 });
 
@@ -179,11 +180,11 @@ function getDueDateInfo(dueDateStr) {
   const diffMs = due - today;
   const diffDays = Math.round(diffMs / 86400000);
 
-  if (diffDays < 0) return { label: `${Math.abs(diffDays)}d overdue`, cls: 'overdue' };
-  if (diffDays === 0) return { label: 'Due today', cls: 'due-soon' };
-  if (diffDays === 1) return { label: 'Due tomorrow', cls: 'due-soon' };
-  if (diffDays <= 3) return { label: `Due in ${diffDays}d`, cls: 'due-soon' };
-  return { label: `Due ${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, cls: '' };
+  if (diffDays < 0) return { label: `<i data-lucide="calendar" style="width:12px;height:12px;margin-right:2px;vertical-align:-1px;"></i> ${Math.abs(diffDays)}d overdue`, cls: 'overdue' };
+  if (diffDays === 0) return { label: `<i data-lucide="calendar" style="width:12px;height:12px;margin-right:2px;vertical-align:-1px;"></i> Due today`, cls: 'due-soon' };
+  if (diffDays === 1) return { label: `<i data-lucide="calendar" style="width:12px;height:12px;margin-right:2px;vertical-align:-1px;"></i> Due tomorrow`, cls: 'due-soon' };
+  if (diffDays <= 3) return { label: `<i data-lucide="calendar" style="width:12px;height:12px;margin-right:2px;vertical-align:-1px;"></i> Due in ${diffDays}d`, cls: 'due-soon' };
+  return { label: `<i data-lucide="calendar" style="width:12px;height:12px;margin-right:2px;vertical-align:-1px;"></i> Due ${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, cls: '' };
 }
 
 // ── Render Tasks ───────────────────────────────────────────────
@@ -211,9 +212,10 @@ function renderTasks() {
       : 'No tasks yet. Add one to get started.';
     taskList.innerHTML = `
       <div class="empty-state">
-        <span class="empty-icon">◈</span>
+        <span class="empty-icon"><i data-lucide="inbox" style="width:48px;height:48px;"></i></span>
         <p>${msg}</p>
       </div>`;
+    if (window.lucide) lucide.createIcons();
     return;
   }
 
@@ -232,17 +234,18 @@ function renderTasks() {
           <div class="task-meta">
             <span class="badge badge-${t.priority}">${t.priority}</span>
             <span class="badge badge-${t.status}">${t.status.replace('_',' ')}</span>
-            ${dueInfo ? `<span class="task-due ${dueInfo.cls}">📅 ${dueInfo.label}</span>` : ''}
+            ${dueInfo ? `<span class="task-due ${dueInfo.cls}">${dueInfo.label}</span>` : ''}
             <span class="task-date">${dateStr}</span>
           </div>
         </div>
         <div class="task-actions">
-          <button class="icon-btn" onclick="duplicateTask(${t.id})" title="Duplicate">⧉</button>
-          <button class="icon-btn" onclick="openEdit(${t.id})" title="Edit">✎</button>
-          <button class="icon-btn delete" onclick="confirmDelete(${t.id})" title="Delete">✕</button>
+          <button class="icon-btn" onclick="duplicateTask(${t.id})" title="Duplicate"><i data-lucide="copy" style="width:16px;height:16px;"></i></button>
+          <button class="icon-btn" onclick="openEdit(${t.id})" title="Edit"><i data-lucide="edit-2" style="width:16px;height:16px;"></i></button>
+          <button class="icon-btn delete" onclick="confirmDelete(${t.id})" title="Delete"><i data-lucide="trash-2" style="width:16px;height:16px;"></i></button>
         </div>
       </div>`;
   }).join('');
+  if (window.lucide) lucide.createIcons();
 }
 
 // ── Toggle Complete ────────────────────────────────────────────
@@ -499,7 +502,7 @@ function prioBar(name, value, max, isPct = false) {
 // ── Toast ──────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg) {
-  toast.textContent = msg;
+  toast.innerHTML = msg;
   toast.classList.remove('hidden');
   toast.classList.add('show');
   clearTimeout(toastTimer);
