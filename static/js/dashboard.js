@@ -323,12 +323,16 @@ document.getElementById('save-task-btn').addEventListener('click', async () => {
   }
   modalErr.classList.add('hidden');
 
+  const btn = document.getElementById('save-task-btn');
+  btn.disabled = true;
+  
   if (editingId) {
     await apiUpdateTask(editingId, { title, description: desc, priority, status, due_date });
   } else {
     await apiAddTask({ title, description: desc, priority, status, due_date });
   }
   closeModal();
+  btn.disabled = false;
 });
 
 // ── API Calls ──────────────────────────────────────────────────
@@ -340,9 +344,11 @@ async function apiAddTask(payload) {
   });
   const data = await res.json();
   if (res.ok) {
-    tasks.unshift(data.task);
-    renderTasks();
-    showToast('Task added ✓');
+    if (!tasks.find(t => t.id === data.task.id)) {
+      tasks.unshift(data.task);
+      renderTasks();
+      showToast('Task added ✓');
+    }
   } else {
     showToast(data.error || 'Error adding task');
   }
@@ -389,9 +395,11 @@ async function duplicateTask(id) {
   const res = await fetch(`/api/tasks/${id}/duplicate`, { method: 'POST' });
   const data = await res.json();
   if (res.ok) {
-    tasks.unshift(data.task);
-    renderTasks();
-    showToast('Task duplicated ✓');
+    if (!tasks.find(t => t.id === data.task.id)) {
+      tasks.unshift(data.task);
+      renderTasks();
+      showToast('Task duplicated ✓');
+    }
   } else {
     showToast(data.error || 'Error duplicating task');
   }
