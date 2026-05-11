@@ -34,7 +34,7 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=7),
 )
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app)
 
 # ─── Rate Limiter ────────────────────────────────────────────────────────────
 limiter = Limiter(
