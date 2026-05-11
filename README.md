@@ -14,6 +14,19 @@ A Python/Flask web application with REST APIs, PostgreSQL, real-time WebSockets,
 | Analytics | Pandas + NumPy |
 | Frontend | HTML5, CSS3, Vanilla JS |
 | Auth | Session-based + Werkzeug password hashing |
+| Icons | Lucide Icons |
+
+---
+
+## Key Features
+
+- **Real-Time Updates**: Tasks update instantly across all open tabs via WebSockets.
+- **Smart Analytics**: Insights powered by Pandas & NumPy (trends, priority breakdowns, completion rates).
+- **Task Management**: Create, edit, delete, and **duplicate** tasks.
+- **Due Dates & Progress Tracking**: Set due dates for tasks, view dynamic overdue warnings, and track overall progress via a real-time progress bar.
+- **Data Export**: One-click **CSV export** of all task history.
+- **Sorting & Filtering**: Advanced sorting (by newest, priority, title, due date) and quick-filter badges.
+- **UI/UX**: Modern responsive design with a persistent **Dark/Light Mode** toggle, secure password visibility toggle, and beautiful **Lucide icons**.
 
 ---
 
@@ -107,6 +120,8 @@ Visit **http://localhost:5000**
 | POST | `/api/auth/register` | Register a new user |
 | POST | `/api/auth/login` | Login |
 | POST | `/api/auth/logout` | Logout |
+| POST | `/api/auth/forgot-password`| Send password reset link |
+| POST | `/api/auth/reset-password` | Reset password using token |
 
 #### Register payload
 ```json
@@ -128,6 +143,8 @@ Visit **http://localhost:5000**
 | POST | `/api/tasks` | Create a task |
 | PUT | `/api/tasks/<id>` | Update a task |
 | DELETE | `/api/tasks/<id>` | Delete a task |
+| POST | `/api/tasks/<id>/duplicate`| Duplicate a task |
+| GET | `/api/tasks/export` | Download tasks as CSV |
 
 #### Task fields
 
@@ -137,6 +154,7 @@ Visit **http://localhost:5000**
 | `description` | string | optional |
 | `priority` | enum | `low`, `medium`, `high` |
 | `status` | enum | `pending`, `in_progress`, `completed` |
+| `due_date` | string (DATE)| optional |
 | `created_at` | ISO datetime | auto |
 
 ---
