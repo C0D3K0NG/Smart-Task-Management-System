@@ -1,0 +1,41 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ─── Virtual Environments ─────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ─── Environment Variables ────────────────────────────────
+.env
+!.env.example
+
+# ─── IDE / Editor ─────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── OS Files ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Distribution / Build ────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ─── Logs ─────────────────────────────────────────────────
+*.log
+
+# ─── Misc ─────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

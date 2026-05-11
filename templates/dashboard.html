@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Your TaskFlow dashboard — manage tasks, view analytics, and stay productive." />
+  <title>TaskFlow — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    (function(){
+      const t = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark">✦</span>
+      <span class="brand-name">TaskFlow</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="tasks">
+        <span class="nav-icon">◈</span> Tasks
+      </button>
+      <button class="nav-item" data-view="analytics">
+        <span class="nav-icon">◎</span> Analytics
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <span class="user-avatar">{{ username[0]|upper }}</span>
+        <span class="user-name">{{ username }}</span>
+      </div>
+      <button id="logout-btn" class="logout-btn" title="Logout">⎋</button>
+    </div>
+  </aside>
+
+  <!-- ── Theme Toggle (top-right) ───────────────────────── -->
+  <button id="theme-toggle-sidebar" class="theme-toggle-corner" title="Toggle dark/light mode" aria-label="Toggle theme">
+    <span id="theme-icon">🌙</span>
+  </button>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Greeting -->
+    <div class="greeting">
+      <h2 class="greeting-text" id="greeting-text">Good evening, {{ username }}!</h2>
+      <p class="greeting-sub">Press <kbd>N</kbd> to quickly add a task</p>
+    </div>
+
+    <!-- Live indicator -->
+    <div class="ws-bar">
+      <span id="ws-dot" class="ws-dot disconnected"></span>
+      <span id="ws-label">Connecting…</span>
+    </div>
+
+    <!-- ── TASKS VIEW ───────────────────────────────────── -->
+    <section id="view-tasks" class="view active">
+      <header class="view-header">
+        <div>
+          <h2 class="view-title">My Tasks</h2>
+          <p class="view-sub">Manage and track your work</p>
+        </div>
+        <div class="header-actions">
+          <button id="export-btn" class="btn-outline" title="Export tasks as CSV">⤓ Export</button>
+          <button id="open-modal-btn" class="btn-add">+ Add Task</button>
+        </div>
+      </header>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-header">
+          <span class="progress-label" id="progress-label">0% complete</span>
+          <span class="progress-count" id="progress-count">0/0 tasks</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Search + Sort -->
+      <div class="search-sort-row">
+        <div class="search-bar">
+          <span class="search-icon">⌕</span>
+          <input id="search-input" type="text" placeholder="Search tasks…" autocomplete="off" />
+        </div>
+        <select id="sort-select" class="sort-select" title="Sort tasks">
+          <option value="created_desc">Newest first</option>
+          <option value="created_asc">Oldest first</option>
+          <option value="priority_desc">Priority: High → Low</option>
+          <option value="priority_asc">Priority: Low → High</option>
+          <option value="title_asc">Title: A → Z</option>
+          <option value="due_asc">Due date: Soonest</option>
+        </select>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-status="">All <span class="badge-count" id="count-all"></span></button>
+        <button class="filter-btn" data-status="pending">Pending <span class="badge-count" id="count-pending"></span></button>
+        <button class="filter-btn" data-status="in_progress">In Progress <span class="badge-count" id="count-in_progress"></span></button>
+        <button class="filter-btn" data-status="completed">Completed <span class="badge-count" id="count-completed"></span></button>
+      </div>
+
+      <!-- Task list -->
+      <div id="task-list" class="task-list">
+        <div class="loading-state">Loading tasks…</div>
+      </div>
+    </section>
+
+    <!-- ── ANALYTICS VIEW ──────────────────────────────── -->
+    <section id="view-analytics" class="view">
+      <header class="view-header">
+        <div>
+          <h2 class="view-title">Analytics</h2>
+          <p class="view-sub">Powered by Pandas &amp; NumPy</p>
+        </div>
+        <button id="refresh-analytics" class="btn-outline">↻ Refresh</button>
+      </header>
+
+      <div id="analytics-content">
+        <div class="loading-state">Loading analytics…</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Add / Edit Task Modal ──────────────────────────── -->
+  <div id="task-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title">New Task</h3>
+        <button id="close-modal" class="modal-close">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Title *</label>
+        <input id="task-title" type="text" placeholder="What needs to be done?" maxlength="200" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="task-desc" rows="3" placeholder="Optional details…" maxlength="2000"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="task-priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="task-status">
+            <option value="pending" selected>Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Due Date <span class="hint">(optional)</span></label>
+        <input id="task-due-date" type="date" />
+      </div>
+
+      <div id="modal-error" class="banner banner-error hidden"></div>
+
+      <div class="modal-actions">
+        <button id="cancel-modal" class="btn-outline">Cancel</button>
+        <button id="save-task-btn" class="btn-primary">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Delete Confirmation Modal ──────────────────────── -->
+  <div id="delete-modal" class="modal-overlay hidden">
+    <div class="confirm-modal-card">
+      <div class="confirm-icon">🗑</div>
+      <h3>Delete Task?</h3>
+      <p>This action cannot be undone. The task will be permanently removed.</p>
+      <div class="confirm-actions">
+        <button id="cancel-delete" class="btn-outline">Cancel</button>
+        <button id="confirm-delete" class="btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+    // ── Set greeting based on time of day ─────────────────────
+    const hour = new Date().getHours();
+    const greetWord = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('greeting-text').textContent = `${greetWord}, {{ username }}!`;
+  </script>
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
